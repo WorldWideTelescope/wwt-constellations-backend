@@ -3,11 +3,11 @@ import { isLeft } from "fp-ts/lib/Either.js";
 import { PathReporter } from "io-ts/lib/PathReporter.js";
 import { Response } from "express";
 import { Request as JwtRequest } from "express-jwt";
-import { FindCursor, ModifyResult, ObjectId, WithId } from "mongodb";
+import { FindCursor, ObjectId, WithId } from "mongodb";
 
 import { State } from "./globals.js";
 import { sceneToJson } from "./scenes.js";
-import { makeRequireSuperuserMiddleware } from "./superuser.js";
+import { makeRequireSuperuserOrRoleMiddleware } from "./permissions.js";
 
 export interface MongoSceneFeature {
   scene_id: ObjectId;
@@ -104,11 +104,11 @@ export function initializeFeatureEndpoints(state: State) {
 
   type FeatureCreationT = t.TypeOf<typeof FeatureCreation>;
 
-  const requireSuperuser = makeRequireSuperuserMiddleware(state);
+  const requireManageFeatures = makeRequireSuperuserOrRoleMiddleware(state, 'manage-features');
 
   state.app.post(
     "/feature",
-    requireSuperuser,
+    requireManageFeatures,
     async (req: JwtRequest, res: Response) => {
 
       const maybe = FeatureCreation.decode(req.body);
@@ -152,7 +152,7 @@ export function initializeFeatureEndpoints(state: State) {
 
   state.app.get(
     "/features",
-    requireSuperuser,
+    requireManageFeatures,
     async (req: JwtRequest, res: Response) => {
       const startDate = new Date(Number(req.query.start_date));
       const endDate = new Date(Number(req.query.end_date));
@@ -180,7 +180,7 @@ export function initializeFeatureEndpoints(state: State) {
 
   state.app.get(
     "/features/queue",
-    requireSuperuser,
+    requireManageFeatures,
     async (req: JwtRequest, res: Response) => {
       const queueDoc = await state.featureQueue.findOne();
       const sceneIDs = queueDoc?.scene_ids ?? [];
@@ -203,7 +203,7 @@ export function initializeFeatureEndpoints(state: State) {
 
   state.app.get(
     "/features/:id",
-    requireSuperuser,
+    requireManageFeatures,
     async (req: JwtRequest, res: Response) => {
       const objectId = new ObjectId(req.params.id);
       const feature = await state.features.findOne({ _id: objectId });
@@ -225,7 +225,7 @@ export function initializeFeatureEndpoints(state: State) {
 
   state.app.patch(
     "/features/:id",
-    requireSuperuser,
+    requireManageFeatures,
     async (req: JwtRequest, res: Response) => {
       const objectId = new ObjectId(req.params.id);
       const feature = await state.features.findOne({ _id: objectId });
@@ -259,7 +259,7 @@ export function initializeFeatureEndpoints(state: State) {
 
   state.app.delete(
     "/features/:id",
-    requireSuperuser,
+    requireManageFeatures,
     async (req: JwtRequest, res: Response) => {
       const objectId = new ObjectId(req.params.id);
       const feature = await state.features.findOne({ _id: objectId });
@@ -287,7 +287,7 @@ export function initializeFeatureEndpoints(state: State) {
 
   state.app.post(
     "/features/queue",
-    requireSuperuser,
+    requireManageFeatures,
     async (req: JwtRequest, res: Response) => {
       const maybe = QueueRequestBody.decode(req.body);
       if (isLeft(maybe)) {

@@ -17,24 +17,7 @@ import { State } from "./globals.js";
 import { MongoScene } from "./scenes.js";
 import { createGlobalTessellation } from "./tessellation.js";
 import { getCurrentFeaturedSceneID } from "./features.js";
-
-export function amISuperuser(req: JwtRequest, state: State): boolean {
-  return req.auth !== undefined && req.auth.sub === state.config.superuserAccountId;
-}
-
-export function makeRequireSuperuserMiddleware(state: State): RequestHandler {
-  return (req: JwtRequest, res: Response, next: NextFunction) => {
-    if (!amISuperuser(req, state)) {
-      res.status(403).json({
-        error: true,
-        message: "Forbidden"
-      });
-    } else {
-      console.warn("executing superuser API call:", req.path);
-      next();
-    }
-  };
-}
+import { amISuperuser, makeRequireSuperuserMiddleware, makeRequireSuperuserOrRoleMiddleware } from "./permissions.js";
 
 export async function updateTimeline(state: State, initialSceneID: ObjectId | null): Promise<void> {
   let initialScene: WithId<MongoScene> | null = null;
@@ -76,8 +59,12 @@ export function initializeSuperuserEndpoints(state: State) {
     });
   });
 
-  // A middleware to require that the request comes from the superuser account.
+  // Middlewares to check various permissions
+  // For all of these, we accept the superuser as well
   const requireSuperuser = makeRequireSuperuserMiddleware(state);
+  const requireUpdateHomeTimeline = makeRequireSuperuserOrRoleMiddleware(state, "update-home-timeline");
+  const requireUpdateGlobalTessellation = makeRequireSuperuserOrRoleMiddleware(state, "update-global-tessellation");
+  const requireManageHandles = makeRequireSuperuserOrRoleMiddleware(state, "manage-handles");
 
   // POST /misc/config-database - Set up some configuration of our backing
   // database.
@@ -120,7 +107,7 @@ export function initializeSuperuserEndpoints(state: State) {
 
   state.app.post(
     "/handle/:handle",
-    requireSuperuser,
+    requireManageHandles,
     async (req: JwtRequest, res: Response) => {
       const handle = req.params.handle;
 
@@ -179,7 +166,7 @@ export function initializeSuperuserEndpoints(state: State) {
 
   state.app.post(
     "/handle/:handle/add-owner",
-    requireSuperuser,
+    requireManageHandles,
     async (req: JwtRequest, res: Response) => {
       const handle = req.params.handle;
       const maybe = HandleOwnerAdd.decode(req.body);
@@ -214,7 +201,7 @@ export function initializeSuperuserEndpoints(state: State) {
 
   state.app.post(
     "/misc/update-timeline",
-    requireSuperuser,
+    requireUpdateHomeTimeline,
     async (req: JwtRequest, res: Response) => {
       const initialIDInput = req.query.initial_id;
       let initialSceneID: ObjectId | null;
@@ -245,7 +232,7 @@ export function initializeSuperuserEndpoints(state: State) {
 
   state.app.post(
     "/misc/update-global-tessellation",
-    requireSuperuser,
+    requireUpdateGlobalTessellation,
     async (_req: JwtRequest, res: Response) => {
       const MIN_DISTANCE_RAD = 0.01; // about 0.6 deg
       const tess = await createGlobalTessellation(state, MIN_DISTANCE_RAD);

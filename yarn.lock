@@ -254,6 +254,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/jsonwebtoken@npm:^9.0.6":
+  version: 9.0.6
+  resolution: "@types/jsonwebtoken@npm:9.0.6"
+  dependencies:
+    "@types/node": "*"
+  checksum: a568e7cb1c703bcb015eff8bf5996e276e748d2b39ddc47edf5ddccd1378f5792179c43302a1c803e47a54b0220f9ecaae445ec444d28bf81b88856f899e85b9
+  languageName: node
+  linkType: hard
+
 "@types/mime@npm:*":
   version: 3.0.4
   resolution: "@types/mime@npm:3.0.4"
@@ -388,6 +397,7 @@ __metadata:
     "@types/express-session": ^1.17.7
     "@types/geojson": ^7946.0.10
     "@types/jsdom": ^21.1.1
+    "@types/jsonwebtoken": ^9.0.6
     "@types/node": ^18.11.15
     "@types/node-schedule": ^2.1.6
     "@types/spdx-expression-parse": ^3.0.2
@@ -408,6 +418,7 @@ __metadata:
     io-ts: ^2.2
     jsdom: ^22.0.0
     jwks-rsa: ^3.0
+    keycloak-js: ^24.0.1
     mongodb: ^5.0.1
     node-schedule: ^2.1.1
     spdx-expression-parse: ^3.0.1
@@ -1230,6 +1241,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"js-sha256@npm:^0.11.0":
+  version: 0.11.0
+  resolution: "js-sha256@npm:0.11.0"
+  checksum: 742d34a0c6eb15247309f1c74889b5a51df01a96e4307375b420fbe973f2f25585012b4d3c8fa52a1b18546153d12587e6463bb725dc1bc58686da03e892c334
+  languageName: node
+  linkType: hard
+
 "js-yaml@npm:3.14.1":
   version: 3.14.1
   resolution: "js-yaml@npm:3.14.1"
@@ -1335,6 +1353,23 @@ __metadata:
     jwa: ^1.4.1
     safe-buffer: ^5.0.1
   checksum: f0213fe5b79344c56cd443428d8f65c16bf842dc8cb8f5aed693e1e91d79c20741663ad6eff07a6d2c433d1831acc9814e8d7bada6a0471fbb91d09ceb2bf5c2
+  languageName: node
+  linkType: hard
+
+"jwt-decode@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "jwt-decode@npm:4.0.0"
+  checksum: 390e2edcb31a92e86c8cbdd1edeea4c0d62acd371f8a8f0a8878e499390c0ecf4c658b365c4e941e4ef37d0170e4ca650aaa49f99a45c0b9695a235b210154b0
+  languageName: node
+  linkType: hard
+
+"keycloak-js@npm:^24.0.1":
+  version: 24.0.1
+  resolution: "keycloak-js@npm:24.0.1"
+  dependencies:
+    js-sha256: ^0.11.0
+    jwt-decode: ^4.0.0
+  checksum: ad38c57a72b2e2e5cc456e77fe1903317f55882e76460105f7207020fb17a2ddcbe6a3e2c1cf09a359dfdc9202c9dc446bffe132155fac3296c1507e67c8a418
   languageName: node
   linkType: hard
 
